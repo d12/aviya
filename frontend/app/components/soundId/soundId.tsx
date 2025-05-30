@@ -1,14 +1,24 @@
-import { Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import { useAudioRecorder } from "~/hooks/useAudioRecorder";
 import { useBirdModel } from "~/hooks/useBirdModel";
 import SpectrogramVisualizer, {
   type SpectrogramCanvasHandle
 } from "../spectogramVisualizer/spectogramVisualizer";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useSpeciesFilter } from "~/hooks/useSpeciesFilter";
+
+interface DetectedBird {
+  label: string;
+  numberOfOccurrences: number;
+  justDetected: boolean;
+}
+
+const BIRD_MATCH_CONFIDENCE_THRESHOLD = 0.5;
 
 export default function SoundId() {
   const spectrogramVisualizerRef = useRef<SpectrogramCanvasHandle>(null);
+
+  const [detectedBirds, setDetectedBirds] = useState<DetectedBird[]>([]);
 
   const {
     ready: modelReady,
@@ -46,14 +56,32 @@ export default function SoundId() {
   });
 
   useEffect(() => {
-    if (latestBirdPrediction) {
-      console.log("[Prediction]", latestBirdPrediction);
+    if (!latestBirdPrediction) return;
 
-      // Filter by the allowed species
-      const filteredSpecies = latestBirdPrediction.filter((prediction) => allowedSpecies.includes(prediction.label));
+    console.log("[Latest prediction]", latestBirdPrediction);
 
-      console.log("[Filtered species]", filteredSpecies);
-    }
+    setDetectedBirds((prev) => {
+      const updatedBirds = new Map(prev.map(bird => [bird.label, { ...bird, justDetected: false }]));
+
+      latestBirdPrediction
+        .filter(prediction => allowedSpecies.includes(prediction.label))
+        .filter(prediction => prediction.probability > BIRD_MATCH_CONFIDENCE_THRESHOLD)
+        .forEach(prediction => {
+          const existing = updatedBirds.get(prediction.label);
+          if (existing) {
+            existing.numberOfOccurrences++;
+            existing.justDetected = true;
+          } else {
+            updatedBirds.set(prediction.label, {
+              label: prediction.label,
+              numberOfOccurrences: 1,
+              justDetected: true,
+            });
+          }
+        });
+
+      return Array.from(updatedBirds.values());
+    });
   }, [latestBirdPrediction, allowedSpecies]);
 
   function getDisplayStatus({
@@ -105,6 +133,52 @@ export default function SoundId() {
         sampleRate={48000}
         ref={spectrogramVisualizerRef}
       />
+
+      <Stack spacing={1} mt={2}>
+        {detectedBirds
+          .sort((a, b) => b.numberOfOccurrences - a.numberOfOccurrences)
+          .map((bird) => {
+            const [scientific, common] = bird.label.split('_');
+
+            return (
+              <Box
+                key={bird.label}
+                display="flex"
+                alignItems="center"
+                p={1}
+                borderRadius={1}
+                sx={{
+                  transition: 'background-color 0.5s ease',
+                  backgroundColor: bird.justDetected ? 'rgba(255, 255, 0, 0.4)' : 'transparent',
+                }}
+              >
+                {/* Placeholder image box */}
+                <Box
+                  width={48}
+                  height={48}
+                  bgcolor="#ccc"
+                  borderRadius={1}
+                  mr={2}
+                  flexShrink={0}
+                />
+
+                {/* Text content */}
+                <Box flex={1}>
+                  <Typography fontWeight="bold">{common}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <em>{scientific}</em>
+                  </Typography>
+                </Box>
+
+                {/* Count */}
+                <Typography fontWeight="bold">
+                  {bird.numberOfOccurrences}
+                </Typography>
+              </Box>
+            );
+          })}
+      </Stack>
+
     </Stack>
   );
 }
