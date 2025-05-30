@@ -42,7 +42,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,

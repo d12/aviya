@@ -5,6 +5,7 @@ import SpectrogramVisualizer, {
   type SpectrogramCanvasHandle
 } from "../spectogramVisualizer/spectogramVisualizer";
 import { useRef, useEffect } from "react";
+import { useSpeciesFilter } from "~/hooks/useSpeciesFilter";
 
 export default function SoundId() {
   const spectrogramVisualizerRef = useRef<SpectrogramCanvasHandle>(null);
@@ -13,7 +14,7 @@ export default function SoundId() {
     ready: modelReady,
     status: modelStatus,
     predict,
-    latest,
+    latest: latestBirdPrediction,
   } = useBirdModel();
 
   const {
@@ -36,26 +37,56 @@ export default function SoundId() {
     onStatus: (msg: string) => console.log("[Recorder]", msg),
   });
 
-  useEffect(() => {
-    if (latest) {
-      console.log("[Prediction]", latest);
-    }
-  }, [latest]);
+  const {
+    ready: speciesReady,
+    status: speciesStatus,
+    allowedSpecies,
+  } = useSpeciesFilter({
+    threshold: 0.02,
+  });
 
-  const displayStatus = !modelReady
-    ? modelStatus
-    : isRecording
-      ? recorderStatus
-      : "Model ready. Click to start.";
+  useEffect(() => {
+    if (latestBirdPrediction) {
+      console.log("[Prediction]", latestBirdPrediction);
+
+      // Filter by the allowed species
+      const filteredSpecies = latestBirdPrediction.filter((prediction) => allowedSpecies.includes(prediction.label));
+
+      console.log("[Filtered species]", filteredSpecies);
+    }
+  }, [latestBirdPrediction, allowedSpecies]);
+
+  function getDisplayStatus({
+    modelReady,
+    modelStatus,
+    speciesReady,
+    speciesStatus,
+    isRecording,
+    recorderStatus,
+  }: {
+    modelReady: boolean;
+    modelStatus: string;
+    speciesReady: boolean;
+    speciesStatus: string;
+    isRecording: boolean;
+    recorderStatus: string;
+  }): string {
+    if (!modelReady) return modelStatus;
+    if (!speciesReady) return speciesStatus;
+    if (isRecording) return recorderStatus;
+    return "Ready to record.";
+  }
+
+  const allReady = modelReady && speciesReady;
 
   return (
     <Stack direction="column" spacing={2}>
-      <Typography variant="body1">Status: {displayStatus}</Typography>
+      <Typography variant="body1">Status: {getDisplayStatus({ modelReady, modelStatus, speciesReady, speciesStatus, isRecording, recorderStatus })}</Typography>
 
       <Stack direction="row" spacing={2} justifyContent="center">
         <Button
           onClick={start}
-          disabled={!modelReady || isRecording}
+          disabled={!allReady || isRecording}
           variant="contained"
         >
           Start

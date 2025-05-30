@@ -52,7 +52,7 @@ class MelSpecLayerSimple extends tf.layers.Layer {
         input = tf.mul(input, 2.0);
 
         let spec = tf.signal.stft(
-          input,
+          input as any,
           this.frameLength,
           this.frameStep,
           this.frameLength,
