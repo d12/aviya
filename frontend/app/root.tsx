@@ -121,7 +121,11 @@ export default function App() {
                   <ListItemText primary="Home" />
                 </ListItemButton>
               </ListItem>
-              {/* Add more nav items here */}
+              <ListItem disablePadding>
+                <ListItemButton component={Link} to="/soundId">
+                  <ListItemText primary="SoundID" />
+                </ListItemButton>
+              </ListItem>
             </List>
           </Box>
         </Drawer>
