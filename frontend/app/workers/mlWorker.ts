@@ -109,7 +109,6 @@ self.onmessage = async (event: MessageEvent) => {
     const topPreds = [...probs]
       .map((p, i) => ({ label: labels[i], probability: p }))
       .sort((a, b) => b.probability - a.probability)
-      .slice(0, 5);
 
     self.postMessage({ type: 'result', result: topPreds });
   }

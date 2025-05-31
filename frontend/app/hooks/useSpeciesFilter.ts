@@ -63,6 +63,8 @@ export function useSpeciesFilter({
       const prediction = model.predict(input) as tf.Tensor;
       const values = await prediction.data();
 
+      // console.log(labels.indexOf("Scolopax minor_American Woodcock"))
+      // console.log(values[labels.indexOf("Scolopax minor_American Woodcock")])
       const allowed = labels.filter((_, i) => values[i] > threshold);
 
       if (!cancelled) {

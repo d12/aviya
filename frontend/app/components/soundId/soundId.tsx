@@ -13,7 +13,12 @@ interface DetectedBird {
   justDetected: boolean;
 }
 
-const BIRD_MATCH_CONFIDENCE_THRESHOLD = 0.5;
+const BIRD_MATCH_CONFIDENCE_THRESHOLD = 0.25;
+
+function birdLabelToImageUrl(label: string) {
+  const [scientific, common] = label.split('_');
+  return `/bird_photos/${scientific.replace(' ', '_')}.jpg`;
+}
 
 export default function SoundId() {
   const spectrogramVisualizerRef = useRef<SpectrogramCanvasHandle>(null);
@@ -52,16 +57,16 @@ export default function SoundId() {
     status: speciesStatus,
     allowedSpecies,
   } = useSpeciesFilter({
-    threshold: 0.02,
+    threshold: 0.005,
   });
 
   useEffect(() => {
     if (!latestBirdPrediction) return;
 
-    console.log("[Latest prediction]", latestBirdPrediction);
-
     setDetectedBirds((prev) => {
       const updatedBirds = new Map(prev.map(bird => [bird.label, { ...bird, justDetected: false }]));
+
+      console.log("Most confident bird", latestBirdPrediction[0].label, latestBirdPrediction[0].probability);
 
       latestBirdPrediction
         .filter(prediction => allowedSpecies.includes(prediction.label))
@@ -154,13 +159,15 @@ export default function SoundId() {
               >
                 {/* Placeholder image box */}
                 <Box
-                  width={48}
-                  height={48}
+                  width={64}
+                  height={64}
                   bgcolor="#ccc"
                   borderRadius={1}
                   mr={2}
                   flexShrink={0}
-                />
+                >
+                  <img src={birdLabelToImageUrl(bird.label)} alt={common} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: "8px" }} />
+                </Box>
 
                 {/* Text content */}
                 <Box flex={1}>
