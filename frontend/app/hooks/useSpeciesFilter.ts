@@ -27,7 +27,7 @@ export function useSpeciesFilter({
       let lat = 0, lon = 0;
       const week = getISOWeek(new Date());
 
-      const labelRes = await fetch("/model/labels.json");
+      const labelRes = await fetch("/aviya/model/labels.json");
       const labels: string[] = await labelRes.json();
 
       let skipPrediction = false;
@@ -56,7 +56,7 @@ export function useSpeciesFilter({
       }
 
       setStatus("Loading model...");
-      const model = await tf.loadGraphModel("/model/mdata/model.json");
+      const model = await tf.loadGraphModel("/aviya/model/mdata/model.json");
 
       setStatus("Predicting...");
       const input = tf.tensor([lat, lon, week]).expandDims(0); // [1, 3]

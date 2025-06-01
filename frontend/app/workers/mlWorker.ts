@@ -89,12 +89,12 @@ self.onmessage = async (event: MessageEvent) => {
     await tf.ready();
 
     self.postMessage({ type: 'status', message: 'Loading model...' });
-    model = await tf.loadLayersModel('/model/model.json', {
+    model = await tf.loadLayersModel('/aviya/model/model.json', {
       // @ts-expect-error: customObjects is supported but not typed
       customObjects: { MelSpecLayerSimple },
     });
 
-    const res = await fetch('/model/labels.json');
+    const res = await fetch('/aviya/model/labels.json');
     labels = await res.json();
 
     self.postMessage({ type: 'status', message: 'Bird model ready.' });

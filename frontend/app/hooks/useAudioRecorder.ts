@@ -36,7 +36,7 @@ export function useAudioRecorder(config: UseAudioRecorderConfig) {
     audioContextRef.current = ctx;
 
     postStatus('Loading audio worklet...');
-    await ctx.audioWorklet.addModule('/audio/recorder-worklet.js');
+    await ctx.audioWorklet.addModule('/aviya/audio/recorder-worklet.js');
 
     const workletNode = new AudioWorkletNode(ctx, 'recorder-worklet');
     workletNodeRef.current = workletNode;
