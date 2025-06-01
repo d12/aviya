@@ -17,7 +17,7 @@ const BIRD_MATCH_CONFIDENCE_THRESHOLD = 0.25;
 
 function birdLabelToImageUrl(label: string) {
   const [scientific, common] = label.split('_');
-  return `/bird_photos/${scientific.replace(' ', '_')}.jpg`;
+  return `/aviya/bird_photos/${scientific.replace(' ', '_')}.jpg`;
 }
 
 export default function SoundId() {
