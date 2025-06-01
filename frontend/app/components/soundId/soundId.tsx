@@ -13,7 +13,7 @@ interface DetectedBird {
   justDetected: boolean;
 }
 
-const BIRD_MATCH_CONFIDENCE_THRESHOLD = 0.25;
+const BIRD_MATCH_CONFIDENCE_THRESHOLD = 0.5;
 
 function birdLabelToImageUrl(label: string) {
   const [scientific, common] = label.split('_');
