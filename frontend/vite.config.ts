@@ -4,8 +4,5 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   base: "/aviya/",
-  build: {
-    outDir: "./dist",
-  },
   plugins: [reactRouter(), tsconfigPaths()],
 });
